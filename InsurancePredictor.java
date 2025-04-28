@@ -6,7 +6,6 @@ import java.util.*;
 public class InsurancePredictor 
 {
     private static List<String[]> allData = new ArrayList<>();
-    
     // hashmap counts each combination and how many yes or no's
     private static Map<String, Map<String, Integer>> countingTable = new HashMap<>();
     

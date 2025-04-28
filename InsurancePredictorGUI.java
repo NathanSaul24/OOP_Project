@@ -8,68 +8,56 @@ public class InsurancePredictorGUI extends JFrame
     private JComboBox<String> jobDropdown, healthDropdown, maritalStatusDropdown;
     private JTextArea resultsBox;
     
-    // loads window and data
+    // load window and data
     public InsurancePredictorGUI() 
     {
-        makeTheWindow();
-        loadTheData();
-    }
-    
-    private void makeTheWindow() 
-    {
-        setTitle("Insurance Predictor"); //title
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //close
-        setLayout(new BorderLayout());
+        // Set up window
+        setTitle("Insurance Predictor");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
         
-        // choice panel
-        JPanel choicesPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        choicesPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
         
-        // age
-        choicesPanel.add(new JLabel("Age:"));
+        // age dropdown
+        panel.add(new JLabel("Age:"));
         ageDropdown = new JComboBox<>(new String[]{"young", "middle", "elderly"});
-        choicesPanel.add(ageDropdown);
+        panel.add(ageDropdown);
         
-        // job
-        choicesPanel.add(new JLabel("Job:"));
+        // job dropdown
+        panel.add(new JLabel("Job:"));
         jobDropdown = new JComboBox<>(new String[]{"employed", "unemployed"});
-        choicesPanel.add(jobDropdown);
+        panel.add(jobDropdown);
         
-        // health
-        choicesPanel.add(new JLabel("Health:"));
+        // health dropdown
+        panel.add(new JLabel("Health:"));
         healthDropdown = new JComboBox<>(new String[]{"healthy", "chronic"});
-        choicesPanel.add(healthDropdown);
+        panel.add(healthDropdown);
         
-        // marital status
-        choicesPanel.add(new JLabel("Marital Status:"));
+        // marital status dropdown
+        panel.add(new JLabel("Marital Status:"));
         maritalStatusDropdown = new JComboBox<>(new String[]{"single", "married"});
-        choicesPanel.add(maritalStatusDropdown);
+        panel.add(maritalStatusDropdown);
         
-        // choices 
-        add(choicesPanel, BorderLayout.NORTH);
-        
-        // results box
-        resultsBox = new JTextArea();
-        resultsBox.setEditable(false);
-        resultsBox.setRows(5);
-        JScrollPane scrollBox = new JScrollPane(resultsBox);
-        add(scrollBox, BorderLayout.CENTER);
-        
-        // predictbutton 
-        JPanel buttonPanel = new JPanel();
+        // predict button
         JButton predictButton = new JButton("Predict");
-        
         predictButton.addActionListener(e -> makeAPrediction());
+        panel.add(predictButton);
         
-        buttonPanel.add(predictButton);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // results area
+        resultsBox = new JTextArea(3, 20);
+        resultsBox.setEditable(false);
+        panel.add(resultsBox);
         
-        pack(); //makes window the right size
+        // ddd panel 
+        add(panel);
+        
+        // load data
+        loadTheData();
     }
     
     private void loadTheData() 
     {
-        // loads data 
+        // Load data from file
         InsurancePredictor.loadDataFromFile("insurance_dataset.csv");
         InsurancePredictor.teachTheProgram();
     }
@@ -78,29 +66,30 @@ public class InsurancePredictorGUI extends JFrame
     {
         try 
         {
-            // get user selections
+            // Get user selections
             String age = (String) ageDropdown.getSelectedItem();
             String job = (String) jobDropdown.getSelectedItem();
             String health = (String) healthDropdown.getSelectedItem();
             String maritalStatus = (String) maritalStatusDropdown.getSelectedItem();
             
-            // calls program
+            // Make prediction
             PredictionResult result = InsurancePredictor.makePrediction(age, job, health, maritalStatus);
             
-            // displays results
-            resultsBox.setText(String.format("Prediction: %s\nprobability: %.2f%%", 
-                result.getPrediction(), result.getProbability() * 100));
+            // Display results
+            resultsBox.setText("Prediction: " + result.getPrediction() + 
+                             "\nProbability: " + (result.getProbability() * 100) + "%");
         } 
         catch (Exception error) 
         {
-            resultsBox.setText("There was a problem making the prediction: " + error.getMessage());
+            resultsBox.setText("Error: " + error.getMessage());
         }
     }
     
-    // starts program
+    // Start program
     public static void main(String[] args) 
     {
-        new InsurancePredictorGUI().setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            new InsurancePredictorGUI().setVisible(true);
+        });
     }
-    
 } 
