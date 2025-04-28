@@ -5,18 +5,17 @@ public class InsurancePredictorGUI extends JFrame
 {
     // dropdowns
     private JComboBox<String> ageDropdown;
-    private JComboBox<String> jobDropdown, healthDropdown, maritalStatusDropdown;
+    private JComboBox<String> jobDropdown, healthDropdown, marriedDropdown;
     private JTextArea resultsBox;
     
     // load window and data
     public InsurancePredictorGUI() 
     {
-        // Set up window
+        // set up window
         setTitle("Insurance Predictor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
-        
-        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(7, 2, 5, 5));
         
         // age dropdown
         panel.add(new JLabel("Age:"));
@@ -35,29 +34,35 @@ public class InsurancePredictorGUI extends JFrame
         
         // marital status dropdown
         panel.add(new JLabel("Marital Status:"));
-        maritalStatusDropdown = new JComboBox<>(new String[]{"single", "married"});
-        panel.add(maritalStatusDropdown);
+        marriedDropdown = new JComboBox<>(new String[]{"single", "married"});
+        marriedDropdown.setSelectedItem("married");
+        panel.add(marriedDropdown);
         
         // predict button
         JButton predictButton = new JButton("Predict");
         predictButton.addActionListener(e -> makeAPrediction());
         panel.add(predictButton);
         
+        // add data button
+        JButton addDataButton = new JButton("Add Data");
+        addDataButton.addActionListener(e -> addNewData());
+        panel.add(addDataButton);
+        
         // results area
         resultsBox = new JTextArea(3, 20);
-        resultsBox.setEditable(false);
+        resultsBox.setEditable(false); //prevents user box interaction
         panel.add(resultsBox);
         
-        // ddd panel 
+        // add panel 
         add(panel);
         
-        // load data
+        // loads data
         loadTheData();
     }
     
     private void loadTheData() 
     {
-        // Load data from file
+        // gets data from file
         InsurancePredictor.loadDataFromFile("insurance_dataset.csv");
         InsurancePredictor.teachTheProgram();
     }
@@ -66,18 +71,17 @@ public class InsurancePredictorGUI extends JFrame
     {
         try 
         {
-            // Get user selections
+            // gets user selections
             String age = (String) ageDropdown.getSelectedItem();
             String job = (String) jobDropdown.getSelectedItem();
             String health = (String) healthDropdown.getSelectedItem();
-            String maritalStatus = (String) maritalStatusDropdown.getSelectedItem();
+            String married = (String) marriedDropdown.getSelectedItem();
             
-            // Make prediction
-            PredictionResult result = InsurancePredictor.makePrediction(age, job, health, maritalStatus);
+            // prediction
+            PredictionResult result = InsurancePredictor.makePrediction(age, job, health, married);
             
-            // Display results
-            resultsBox.setText("Prediction: " + result.getPrediction() + 
-                             "\nProbability: " + (result.getProbability() * 100) + "%");
+            // results
+            resultsBox.setText("Prediction: " + result.getPrediction() + "\nProbability: " + (result.getProbability() * 100) + "%");
         } 
         catch (Exception error) 
         {
@@ -85,11 +89,35 @@ public class InsurancePredictorGUI extends JFrame
         }
     }
     
-    // Start program
+    private void addNewData() 
+    {
+        try 
+        {
+            // selections from dropdowns
+            String age = (String) ageDropdown.getSelectedItem();
+            String job = (String) jobDropdown.getSelectedItem();
+            String health = (String) healthDropdown.getSelectedItem();
+            String married = (String) marriedDropdown.getSelectedItem();
+            
+            // pop up for yes or no value
+            int answer = JOptionPane.showConfirmDialog(this, "Did this person get insured?", "Add New Line", JOptionPane.YES_NO_OPTION);
+            
+            // converts answer to yes or no
+            String insured = (answer == JOptionPane.YES_OPTION) ? "yes" : "no";
+            
+            // adds data to hashmap
+            InsurancePredictor.addNewData(age, job, health, married, insured);
+            resultsBox.setText("New line added");
+        } 
+        catch (Exception error) 
+        {
+            resultsBox.setText("Error: " + error.getMessage());
+        }
+    }
+    
     public static void main(String[] args) 
     {
-        SwingUtilities.invokeLater(() -> {
-            new InsurancePredictorGUI().setVisible(true);
-        });
+        new InsurancePredictorGUI().setVisible(true);
     }
+    
 } 

@@ -6,10 +6,10 @@ import java.util.*;
 public class InsurancePredictor 
 {
     private static List<String[]> allData = new ArrayList<>();
-    // hashmap counts each combination and how many yes or no's
-    private static Map<String, Map<String, Integer>> countingTable = new HashMap<>();
+
+    private static Map<String, Map<String, Integer>> countingTable = new HashMap<>(); // some basic principles taken from https://www.geeksforgeeks.org/hashmap-values-method-in-java/
     
-    // reads data and inserts to list
+    // reads data and inserts to array
     public static void loadDataFromFile(String fileName) 
     {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))) 
@@ -17,11 +17,11 @@ public class InsurancePredictor
             // skips first line
             fileReader.readLine();
             
-            // Read each line 
+            // read each line 
             String line;
             while ((line = fileReader.readLine()) != null) 
             {
-                // splits the line by its commas
+                // splits line by commas
                 String[] onePerson = line.split(",");
                 allData.add(onePerson);
             }
@@ -32,11 +32,10 @@ public class InsurancePredictor
         }
     }
     
-    // teaches program by counting how many times each combination appears
-    public static void teachTheProgram() 
+    public static void teachTheProgram() // some basic principles taken from https://www.geeksforgeeks.org/hashmap-values-method-in-java/
     {
         // clears old data
-        countingTable.clear();
+        countingTable.clear(); 
         
         // looks at each persons data
         for (String[] onePerson : allData) 
@@ -45,11 +44,11 @@ public class InsurancePredictor
             String personAge = onePerson[0];
             String personJob = onePerson[1];
             String personHealth = onePerson[2];
-            String personMaritalStatus = onePerson[3];
-            String didTheyBuyInsurance = onePerson[4];
+            String personMarried = onePerson[3];
+            String didTheyGetInsured = onePerson[4];
             
             // makes a key string for each person
-            String personKey = personAge + "," + personJob + "," + personHealth + "," + personMaritalStatus;
+            String personKey = personAge + "," + personJob + "," + personHealth + "," + personMarried;
             
             // creates a new map if new combo
             if (!countingTable.containsKey(personKey)) 
@@ -59,39 +58,54 @@ public class InsurancePredictor
             
             // counts how many of this combo were insured
             Map<String, Integer> yesNoCounts = countingTable.get(personKey);
-            yesNoCounts.put(didTheyBuyInsurance, yesNoCounts.getOrDefault(didTheyBuyInsurance, 0) + 1);
+            yesNoCounts.put(didTheyGetInsured, yesNoCounts.getOrDefault(didTheyGetInsured, 0) + 1);
         }
     }
     
-    //makes the prediction
-    public static PredictionResult makePrediction(String age, String job, String health, String maritalStatus) 
+    // makes the prediction
+    public static PredictionResult makePrediction(String age, String job, String health, String married) 
     {
-        // key string combines all info
-        String personKey = age + "," + job + "," + health + "," + maritalStatus;
+        // make a key for this person's details
+        String personKey = age + "," + job + "," + health + "," + married;
         
-        // counts for that combo
-        Map<String, Integer> yesNoCounts = countingTable.getOrDefault(personKey, new HashMap<>());
+        // get the counts for this combination
+        Map<String, Integer> counts = countingTable.get(personKey);
         
-        // how many yes/nos for that combo
-        int yesCount = yesNoCounts.getOrDefault("yes", 0);
-        int noCount = yesNoCounts.getOrDefault("no", 0);
+        // get yes and no count from hashmap
+        int yesCount = counts.getOrDefault("yes", 0);
+        int noCount = counts.getOrDefault("no", 0);
         
-        // total times weve seen that combo
-        int totalCount = yesCount + noCount;
+        // calculate total and probability
+        int total = yesCount + noCount;
+        double probability = (double)yesCount / total;
         
-        // probability of yes
-        double probabilityOfYes = totalCount > 0 ? (double) yesCount / totalCount : 0.5;
+        // decide prediction
+        String prediction;
+        if (yesCount >= noCount) 
+        {
+            prediction = "yes";
+        } 
+        else 
+        {
+            prediction = "no";
+        }
         
-        // decides insurance coverage based on which is higher
-        String prediction = (yesCount >= noCount) ? "yes" : "no";
-        
-        // returns prediction and probability
-        return new PredictionResult(prediction, probabilityOfYes);
+        return new PredictionResult(prediction, probability);
     }
     
     // allows other parts to see the hashmap
     public static Map<String, Map<String, Integer>> getCountingTable() 
     {
         return countingTable;
+    }
+    
+    public static void addNewData(String age, String job, String health, String married, String insured) 
+    {
+        // create new data line
+        String[] newData = {age, job, health, married, insured};
+        allData.add(newData);
+        
+        // retrain with new data
+        teachTheProgram();
     }
 } 
