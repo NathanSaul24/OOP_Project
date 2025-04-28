@@ -71,6 +71,12 @@ public class InsurancePredictor
         // get the counts for this combination
         Map<String, Integer> counts = countingTable.get(personKey);
         
+        //default if new combo
+        if (counts == null) 
+        {
+            return new PredictionResult("no", 0.4);
+        }
+        
         // get yes and no count from hashmap
         int yesCount = counts.getOrDefault("yes", 0);
         int noCount = counts.getOrDefault("no", 0);
